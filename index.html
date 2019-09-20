@@ -1,0 +1,190 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <title>The Segment Consent Demo</title>
+  <meta name="description">
+  <meta name="author" content="Ryan Musser">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="./moment.js"></script>
+  <script src="./utils.js"></script>
+  <script src="./index.js"></script>
+  <script>
+    var segmentIntegrations = {
+      integrations: {
+        'All': false,
+        'AppNexus': false,
+        'MediaMath': false,
+        'comScore': false,
+        'AdRoll': false,
+        'Salesforce': false,
+        'Segment.io': false
+      }
+    };
+
+    //invoking Segment, but not initializing...
+    //We use this to understand Segment's state
+    //without tracking anything
+    //(analytics.invoked is true and analytics.initialized is undefined)
+    ! function() {
+      var analytics = window.analytics = window.analytics || [];
+      if (!analytics.initialize)
+        if (analytics.invoked) window.console && console.error && console.error("Segment snippet included twice.");
+        else {
+          analytics.invoked = !0;
+          analytics.methods = ["trackSubmit", "trackClick", "trackLink", "trackForm", "pageview", "identify", "reset", "group", "track", "ready", "alias", "debug", "page", "once", "off", "on"];
+          analytics.factory = function(t) {
+            return function() {
+              var e = Array.prototype.slice.call(arguments);
+              e.unshift(t);
+              analytics.push(e);
+              return analytics
+            }
+          };
+          for (var t = 0; t < analytics.methods.length; t++) {
+            var e = analytics.methods[t];
+            analytics[e] = analytics.factory(e)
+          }
+          analytics.load = function(t, e) {
+            var n = document.createElement("script");
+            n.type = "text/javascript";
+            n.async = !0;
+            n.src = "https://cdn.segment.com/analytics.js/v1/" + t + "/analytics.min.js";
+            var a = document.getElementsByTagName("script")[0];
+            a.parentNode.insertBefore(n, a);
+            analytics._loadOptions = e
+          };
+          analytics.SNIPPET_VERSION = "4.1.0";
+        }
+    }();
+  </script>
+  <!-- Quantcast Choice. Consent Manager Tag -->
+  <script type="text/javascript" async=true>
+    var elem = document.createElement('script');
+    //elem.src = 'https://quantcast.mgr.consensu.org/cmp.js';
+    elem.src = "https://segment-consent-demo.s3-us-west-2.amazonaws.com/cmp.js";
+    elem.async = true;
+    elem.type = "text/javascript";
+    var scpt = document.getElementsByTagName('script')[0];
+    scpt.parentNode.insertBefore(elem, scpt);
+    (function() {
+      var gdprAppliesGlobally = true;
+
+      function addFrame() {
+        if (!window.frames['__cmpLocator']) {
+          if (document.body) {
+            var body = document.body,
+              iframe = document.createElement('iframe');
+            iframe.style = 'display:none';
+            iframe.name = '__cmpLocator';
+            body.appendChild(iframe);
+          } else {
+            // In the case where this stub is located in the head,
+            // this allows us to inject the iframe more quickly than
+            // relying on DOMContentLoaded or other events.
+            setTimeout(addFrame, 5);
+          }
+        }
+      }
+      addFrame();
+
+      function cmpMsgHandler(event) {
+        var msgIsString = typeof event.data === "string";
+        var json;
+        if (msgIsString) {
+          json = event.data.indexOf("__cmpCall") != -1 ? JSON.parse(event.data) : {};
+        } else {
+          json = event.data;
+        }
+        if (json.__cmpCall) {
+          var i = json.__cmpCall;
+          window.__cmp(i.command, i.parameter, function(retValue, success) {
+            var returnMsg = {
+              "__cmpReturn": {
+                "returnValue": retValue,
+                "success": success,
+                "callId": i.callId
+              }
+            };
+            event.source.postMessage(msgIsString ?
+              JSON.stringify(returnMsg) : returnMsg, '*');
+          });
+        }
+      }
+      window.__cmp = function(c) {
+        var b = arguments;
+        if (!b.length) {
+          return __cmp.a;
+        } else if (b[0] === 'ping') {
+          b[2]({
+            "gdprAppliesGlobally": gdprAppliesGlobally,
+            "cmpLoaded": false
+          }, true);
+        } else if (c == '__cmp')
+          return false;
+        else {
+          if (typeof __cmp.a === 'undefined') {
+            __cmp.a = [];
+          }
+          __cmp.a.push([].slice.apply(b));
+        }
+      }
+      window.__cmp.gdprAppliesGlobally = gdprAppliesGlobally;
+      window.__cmp.msgHandler = cmpMsgHandler;
+      if (window.addEventListener) {
+        window.addEventListener('message', cmpMsgHandler, false);
+      } else {
+        window.attachEvent('onmessage', cmpMsgHandler);
+      }
+    })();
+    window.__cmp('init', {
+      'Language': 'en',
+      'Initial Screen Reject Button Text': 'I DO NOT ACCEPT',
+      'Initial Screen Accept Button Text': 'I ACCEPT',
+      'Purpose Screen Body Text': 'You can set your consent preferences and determine how you want your data to be used based on the purposes below. You may set your preferences for us independently from those of third-party partners. Each purpose has a description so that you know how we and partners use your data.',
+      'Purpose Screen Vendor Link Text': 'See Vendors',
+      'Purpose Screen Save and Exit Button Text': 'SAVE &amp; EXIT',
+      'Vendor Screen Body Text': 'You can set consent preferences for individual third-party partners we work with below. Expand each company list item to see what purposes they use data for to help make your choices. In some cases, companies may use your data without asking for your consent, based on their legitimate interests. You can click on their privacy policy links for more information and to object to such processing. ',
+      'Vendor Screen Accept All Button Text': 'ACCEPT ALL',
+      'Vendor Screen Reject All Button Text': 'REJECT ALL',
+      'Vendor Screen Purposes Link Text': 'Back to Purposes',
+      'Vendor Screen Save and Exit Button Text': 'SAVE &amp; EXIT',
+      'Initial Screen Body Text': 'We and our partners use technologies, such as cookies, and process personal data, such as IP addresses and cookie identifiers, to personalise ads and content based on your interests, measure the performance of ads and content, and derive insights about the audiences who saw ads and content. Click below to consent to the use of this technology and the processing of your personal data for these purposes. You can change your mind and change your consent choices at any time by returning to this site. ',
+      'Initial Screen Body Text Option': 1,
+      'Publisher Name': 'Segment Demo',
+      'Publisher Logo': 'https://assets.brandfolder.com/pvmi3b-cmd594-7wr5rz/view@2x.png?v=1564772433',
+      'Display UI': 'always',
+      'Publisher Purpose IDs': [2, 3, 4, 5],
+      'Consent Scope': 'service',
+      'UI Layout': 'banner',
+      "Display Persistent Consent Link": false,
+    });
+  </script>
+</head>
+
+<body>
+  <div class="jumbotron">
+    <div class="row">
+      <div id="consentLog" class="col-6">
+        Event log
+        <hr />
+      </div>
+      <div class="col-6">
+        Actions
+        <hr />
+        <button onclick="window.__cmp('displayConsentUi')" type="button" class="btn btn-primary">Show Consent Modal</button>
+        <br /><br />
+        <button onclick="sendEvent()" type="button" class="btn btn-success">Send Track Event</button>
+      </div>
+    </div>
+  </div>
+</body>
+<script src="./segmentQuantcast.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+</html>
